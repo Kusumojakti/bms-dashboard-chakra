@@ -1,3 +1,7 @@
+* {
+  font-family: "Nunito";
+}
+
 .main {
   display: flex;
   flex-direction: column;
