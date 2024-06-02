@@ -1,3 +1,8 @@
+"use client";
+
+import React, { useRef, useState, useEffect } from "react";
+import { useDisclosure } from "@chakra-ui/react";
+import axios from "axios";
 import {
   Container,
   Heading,
@@ -14,23 +19,65 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
   Button,
   Avatar,
   Text,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  FormControl,
+  FormLabel,
+  Input,
+  Flex,
 } from "@chakra-ui/react";
+import { useCookies } from "react-cookie";
 
 import Navbar from "../navbar/page";
 
-function tableUsers() {
+interface EWS {
+  id: string;
+  nama_ews: string;
+  alamat: string;
+  lat: number;
+  long: number;
+}
+
+function TableUsers() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const initialRef = useRef(null);
+  const finalRef = useRef(null);
+  const [data, setData] = useState<EWS[]>([]);
+  const [selectedLocationData, setSelectedLocationData] = useState<EWS | null>(
+    null
+  );
+
+  const getDataEWS = async () => {
+    try {
+      const response = await axios.get("https://bms.d2l.my.id/api/ews");
+      setData(response.data.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getDataEWS();
+  }, []);
+
   return (
     <>
-      <Navbar />;
+      <Navbar />
       <Container maxW="6xl" px={{ base: 6, md: 3 }} py={16}>
-        <Heading fontFamily={"Nunito"} fontWeight={"800"} mb={"30px"}>
+        <Heading
+          fontFamily={"Nunito"}
+          fontWeight={"800"}
+          mb={"30px"}
+          mt={"40px"}
+        >
           Table Early Warning System
         </Heading>
         {/* table content */}
@@ -43,40 +90,79 @@ function tableUsers() {
                 <Th>Alamat</Th>
                 <Th>Lat</Th>
                 <Th>Long</Th>
+                <Th>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
-              <Tr>
-                <Td>EWS001</Td>
-                <Td>EWS - Ambarukmo Plaza</Td>
-                <Td>Jalan Jogja - Solo </Td>
-                <Td>-7.8055542 </Td>
-                <Td> 110.3979941 </Td>
-                <Td>
-                  {" "}
-                  <Menu>
-                    <MenuButton
-                      as={Button}
-                      rounded={"full"}
-                      variant={"link"}
-                      cursor={"pointer"}
-                      minW={0}
-                    >
-                      <Text>Edit</Text>
-                      {/* <Avatar
-                        size={"sm"}
-                        src={
-                          "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?t=st=1714799444~exp=1714803044~hmac=acbcfdc447bf9d55fe1f485c876f6976d1c4e81fcff0863b4d43cc3d27309677&w=740"
-                        }
-                      /> */}
-                    </MenuButton>
-                    <MenuList>
-                      <MenuItem>Update EWS</MenuItem>
-                      <MenuItem>Delete EWS</MenuItem>
-                    </MenuList>
-                  </Menu>
-                </Td>
-              </Tr>
+              {data.map((location, index) => (
+                <Tr key={index}>
+                  <Td>{location.id}</Td>
+                  <Td>{location.nama_ews}</Td>
+                  <Td>{location.alamat}</Td>
+                  <Td>{location.lat}</Td>
+                  <Td>{location.long}</Td>
+                  <Td>
+                    <Menu>
+                      <MenuButton
+                        as={Button}
+                        rounded={"full"}
+                        variant={"link"}
+                        cursor={"pointer"}
+                        minW={0}
+                      >
+                        <Text>Edit</Text>
+                      </MenuButton>
+                      <MenuList>
+                        <MenuItem onClick={onOpen}>
+                          Update EWS
+                          {/* <Modal
+                            initialFocusRef={initialRef}
+                            finalFocusRef={finalRef}
+                            isOpen={isOpen}
+                            onClose={onClose}
+                          >
+                            <ModalOverlay />
+                            <ModalContent>
+                              <ModalHeader>Create new account</ModalHeader>
+                              <ModalCloseButton />
+                              <ModalBody pb={6}>
+                                <FormControl>
+                                  <FormLabel>User ID</FormLabel>
+                                  <Input
+                                    ref={initialRef}
+                                    placeholder="User ID"
+                                  />
+                                </FormControl>
+
+                                <FormControl mt={4}>
+                                  <FormLabel>Nama</FormLabel>
+                                  <Input placeholder="Nama" />
+                                </FormControl>
+                                <FormControl mt={4}>
+                                  <FormLabel>Email</FormLabel>
+                                  <Input placeholder="Email" />
+                                </FormControl>
+                                <FormControl mt={4}>
+                                  <FormLabel>Password</FormLabel>
+                                  <Input placeholder="Password" />
+                                </FormControl>
+                              </ModalBody>
+
+                              <ModalFooter>
+                                <Button colorScheme="blue" mr={3}>
+                                  Save
+                                </Button>
+                                <Button onClick={onClose}>Cancel</Button>
+                              </ModalFooter>
+                            </ModalContent>
+                          </Modal> */}
+                        </MenuItem>
+                        <MenuItem>Delete EWS</MenuItem>
+                      </MenuList>
+                    </Menu>
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </TableContainer>
@@ -85,4 +171,4 @@ function tableUsers() {
   );
 }
 
-export default tableUsers;
+export default TableUsers;

@@ -4,7 +4,6 @@ import React, { useRef, useState, useEffect } from "react";
 import { useDisclosure, Button, Text, Heading } from "@chakra-ui/react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import axios from "axios";
-import useHistory from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
@@ -22,6 +21,7 @@ import Voltage from "../component/voltage";
 import Ampere from "../component/ampere";
 
 interface Location {
+  id: string; // Tambahkan id di sini
   nama_ews: string;
   alamat: string;
   lat: number;
@@ -66,8 +66,8 @@ const Maps = () => {
         <div className="col text-center">
           <div className="col">
             <MapContainer
-              center={[-7.8032485, 110.333645]}
-              zoom={15}
+              center={[-7.7889, 110.5012]}
+              zoom={11}
               zoomControl={false}
               scrollWheelZoom={true}
               style={{ height: "100vh" }}
@@ -78,13 +78,7 @@ const Maps = () => {
               />
 
               {data.map((location, index) => (
-                <Marker
-                  key={index}
-                  position={[location.lat, location.long]}
-                  // eventHandlers={{
-                  //   click: () => handleOpenDrawer(index, location),
-                  // }}
-                >
+                <Marker key={index} position={[location.lat, location.long]}>
                   <Popup>
                     <Heading as="h4" size="md">
                       {location.nama_ews}
@@ -124,9 +118,9 @@ const Maps = () => {
                     {selectedLocationData.nama_ews}
                   </Heading>
                   <Text mb={"30px"}>{selectedLocationData.alamat}</Text>
-                  <Temperature />
-                  <Voltage />
-                  <Ampere />
+                  <Temperature idEws={selectedLocationData.id} />
+                  <Voltage idEws={selectedLocationData.id} />
+                  <Ampere idEws={selectedLocationData.id} />
                 </>
               ) : (
                 <Text>No location selected</Text>

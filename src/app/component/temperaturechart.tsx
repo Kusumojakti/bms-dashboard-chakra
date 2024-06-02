@@ -1,81 +1,88 @@
 "use client";
 
-import React from "react";
-import { Container, Text, SimpleGrid } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
-import { useState } from "react";
+import axios from "axios";
 
-import Navbar from "../navbar/page";
+interface TempProps {
+  idEws: string;
+}
 
-function Temperature() {
+function Temperature({ idEws }: TempProps) {
   const [state, setState] = useState({
     series: [
       {
-        name: "Desktops",
-        data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
+        name: "Temperature",
+        data: [] as number[],
       },
     ],
     options: {
       chart: {
         height: 350,
-        type: "radialBar",
+        type: "line" as "line",
         zoom: {
           enabled: true,
         },
       },
       dataLabels: {
         enabled: false,
-        style: {
-          colors: ["#F44336", "#E91E63", "#9C27B0"],
-        },
       },
       stroke: {
-        curve: "straight",
+        curve: "straight" as "straight",
       },
       title: {
         text: "Temperature",
-        align: "left",
-      },
-      dropShadow: {
-        enabled: true,
-        top: 0,
-        left: 0,
-        blur: 10,
-        opacity: 0.5,
-      },
-      grid: {
-        row: {
-          colors: ["#f3f3f3", "white"], // takes an array which will be repeated on columns
-          opacity: 0.5,
-        },
-        fill: {
-          colors: ["#E91E63", "#9C27B0"],
-        },
+        align: "left" as "left",
       },
       xaxis: {
-        categories: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-        ],
+        categories: [] as string[],
       },
     },
   });
+
+  useEffect(() => {
+    // Fetch data dari API menggunakan axios
+    axios
+      .get("https://bms.d2l.my.id/api/iot/conditions")
+      .then((response) => {
+        const data = response.data.data;
+        const tempData: number[] = [];
+        const categories: string[] = [];
+
+        data.forEach((item: any) => {
+          if (item.id === idEws && item._field === "temperature") {
+            tempData.push(item._value);
+            categories.push(item._time); // Misalnya jika ada timestamp di data
+          }
+        });
+
+        setState((prevState) => ({
+          ...prevState,
+          series: [{ name: "Temperature", data: tempData }],
+          options: {
+            ...prevState.options,
+            xaxis: {
+              ...prevState.options.xaxis,
+              categories: categories,
+            },
+          },
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching data: ", error);
+      });
+  }, [idEws]);
+
   return (
     <div id="chart">
       <ReactApexChart
         options={state.options}
         series={state.series}
-        type="area"
+        type="line"
         height={350}
       />
     </div>
   );
 }
+
 export default Temperature;

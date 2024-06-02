@@ -6,7 +6,6 @@ import {
   Table,
   Thead,
   Tbody,
-  Tfoot,
   Tr,
   Th,
   Td,
@@ -28,18 +27,187 @@ import {
   FormLabel,
   Input,
   Flex,
+  useToast,
 } from "@chakra-ui/react";
 
 import { useDisclosure } from "@chakra-ui/react";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
+import { useRouter } from "next/navigation";
 
 import Navbar from "../navbar/page";
+import axios from "axios";
+
+interface users {
+  id: string;
+  name: string;
+  id_roles: string;
+}
 
 function tableUsers() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [cookies, setCookie] = useCookies(["token"]);
+  const [editUser, setEditUser] = useState<users | null>(null);
+  const {
+    isOpen: isEditModalOpen,
+    onOpen: onEditModalOpen,
+    onClose: onEditModalClose,
+  } = useDisclosure();
 
   const initialRef = useRef(null);
   const finalRef = useRef(null);
+  const [data, setData] = useState<users[]>([]);
+  const [selectedLocationData, setSelectedLocationData] =
+    useState<users | null>(null);
+
+  const getDataEWS = async () => {
+    try {
+      const response = await axios.get("https://bms.d2l.my.id/api/user", {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      });
+      setData(response.data.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const [user_id, setUser_id] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirm_password, setConfirmPassword] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
+  const router = useRouter();
+  const toast = useToast();
+
+  useEffect(() => {
+    getDataEWS();
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    const response = await axios.post(
+      "https://bms.d2l.my.id/api/auth/register",
+      {
+        user_id: user_id,
+        name: name,
+        email: email,
+        password: password,
+        confirm_password: confirm_password,
+      }
+    );
+
+    const data = response.data;
+    if (data.success == false) {
+      toast({
+        title: data.message,
+        position: "bottom",
+        status: "error",
+        isClosable: true,
+      });
+      setLoading(false);
+      return false;
+    }
+
+    toast({
+      title: data.message,
+      position: "bottom",
+      status: "success",
+      isClosable: true,
+    });
+
+    // redirect ke halaman home
+    router.push("/users");
+    setLoading(false);
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await axios.delete(`https://bms.d2l.my.id/api/user/${id}`, {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      });
+
+      // Update UI setelah penghapusan data
+      setData(data.filter((user) => user.id !== id));
+
+      toast({
+        title: "User deleted successfully",
+        position: "bottom",
+        status: "success",
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Failed to delete user",
+        position: "bottom",
+        status: "error",
+        isClosable: true,
+      });
+    }
+  }
+
+  async function handleEdit(id: string) {
+    const userToEdit = data.find((user) => user.id === id);
+    if (userToEdit) {
+      setEditUser(userToEdit);
+      onEditModalOpen();
+    }
+  }
+
+  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await axios.put(
+        `https://bms.d2l.my.id/api/user/${editUser?.id}`,
+        {
+          name: editUser?.name,
+          id_roles: editUser?.id_roles,
+          // tambahkan field lain yang perlu diupdate
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.token}`,
+          },
+        }
+      );
+
+      const updatedUser = response.data;
+      const updatedData = data.map((user) =>
+        user.id === updatedUser.id ? updatedUser : user
+      );
+      setData(updatedData);
+
+      toast({
+        title: "User updated successfully",
+        position: "bottom",
+        status: "success",
+        isClosable: true,
+      });
+
+      onEditModalClose();
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Failed to update user",
+        position: "bottom",
+        status: "error",
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <>
       <Navbar />;
@@ -59,34 +227,116 @@ function tableUsers() {
           onClose={onClose}
         >
           <ModalOverlay />
+          <form onSubmit={handleSubmit}>
+            <ModalContent>
+              <ModalHeader>Create new account</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <FormControl>
+                  <FormLabel>User ID</FormLabel>
+                  <Input
+                    ref={initialRef}
+                    placeholder="User ID"
+                    value={user_id}
+                    onChange={(e) => setUser_id(e.target.value)}
+                  />
+                </FormControl>
+
+                <FormControl mt={4}>
+                  <FormLabel>Nama</FormLabel>
+                  <Input
+                    placeholder="Nama"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Input
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <Input
+                    placeholder="Confirm_Password"
+                    value={confirm_password}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </FormControl>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="submit"
+                  isLoading={loading}
+                >
+                  Save
+                </Button>
+                <Button onClick={onClose}>Cancel</Button>
+              </ModalFooter>
+            </ModalContent>
+          </form>
+        </Modal>
+
+        {/* modal edit */}
+        <Modal isOpen={isEditModalOpen} onClose={onEditModalClose}>
+          <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Create new account</ModalHeader>
+            <ModalHeader>Edit User</ModalHeader>
             <ModalCloseButton />
             <ModalBody pb={6}>
               <FormControl>
                 <FormLabel>User ID</FormLabel>
-                <Input ref={initialRef} placeholder="User ID" />
+                <Input value={editUser?.id || ""} isReadOnly />
               </FormControl>
-
               <FormControl mt={4}>
                 <FormLabel>Nama</FormLabel>
-                <Input placeholder="Nama" />
+                <Input
+                  value={editUser?.name || ""}
+                  onChange={(e) =>
+                    setEditUser((prevUser) =>
+                      prevUser ? { ...prevUser, name: e.target.value } : null
+                    )
+                  }
+                />
               </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input placeholder="Email" />
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Password</FormLabel>
-                <Input placeholder="Password" />
+                <FormLabel>Role</FormLabel>
+                <Input
+                  value={editUser?.id_roles || ""}
+                  onChange={(e) =>
+                    setEditUser((prevUser) =>
+                      prevUser
+                        ? { ...prevUser, id_roles: e.target.value }
+                        : null
+                    )
+                  }
+                />
               </FormControl>
             </ModalBody>
-
             <ModalFooter>
-              <Button colorScheme="blue" mr={3}>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                onClick={handleUpdate}
+                isLoading={loading}
+              >
                 Save
               </Button>
-              <Button onClick={onClose}>Cancel</Button>
+              <Button onClick={onEditModalClose}>Cancel</Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
@@ -98,38 +348,38 @@ function tableUsers() {
                 <Th>ID User</Th>
                 <Th>Nama</Th>
                 <Th>Role</Th>
+                <Th>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
-              <Tr>
-                <Td>PUI001</Td>
-                <Td>Admin</Td>
-                <Td>Admin </Td>
-                <Td>
-                  {" "}
-                  <Menu>
-                    <MenuButton
-                      as={Button}
-                      rounded={"full"}
-                      variant={"link"}
-                      cursor={"pointer"}
-                      minW={0}
-                    >
-                      <Text>Edit</Text>
-                      {/* <Avatar
-                        size={"sm"}
-                        src={
-                          "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?t=st=1714799444~exp=1714803044~hmac=acbcfdc447bf9d55fe1f485c876f6976d1c4e81fcff0863b4d43cc3d27309677&w=740"
-                        }
-                      /> */}
-                    </MenuButton>
-                    <MenuList>
-                      <MenuItem>Update Profile</MenuItem>
-                      <MenuItem>Delete Profile</MenuItem>
-                    </MenuList>
-                  </Menu>
-                </Td>
-              </Tr>
+              {data.map((location, index) => (
+                <Tr key={index}>
+                  <Td>{location.id}</Td>
+                  <Td>{location.name}</Td>
+                  <Td>{location.id_roles}</Td>
+                  <Td>
+                    <Menu>
+                      <MenuButton
+                        as={Button}
+                        rounded={"full"}
+                        variant={"link"}
+                        cursor={"pointer"}
+                        minW={0}
+                      >
+                        <Text>Edit</Text>
+                      </MenuButton>
+                      <MenuList>
+                        <MenuItem onClick={() => handleEdit(location.id)}>
+                          Update Profile
+                        </MenuItem>
+                        <MenuItem onClick={() => handleDelete(location.id)}>
+                          Delete Profile
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </TableContainer>

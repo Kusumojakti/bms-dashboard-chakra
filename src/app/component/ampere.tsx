@@ -1,75 +1,88 @@
 "use client";
 
-import React from "react";
-import { Container, Text, SimpleGrid } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
-import { useState } from "react";
+import axios from "axios";
 
-import Navbar from "../navbar/page";
+interface AmpereProps {
+  idEws: string;
+}
 
-function Ampere() {
+function Ampere({ idEws }: AmpereProps) {
   const [state, setState] = useState({
     series: [
       {
-        name: "Desktops",
-        data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
+        name: "Ampere",
+        data: [] as number[],
       },
     ],
     options: {
       chart: {
         height: 350,
-        type: "line",
+        type: "line" as "line",
         zoom: {
-          enabled: false,
+          enabled: true,
         },
       },
       dataLabels: {
         enabled: false,
-        style: {
-          colors: ["#F44336", "#E91E63", "#9C27B0"],
-        },
       },
       stroke: {
-        curve: "straight",
+        curve: "straight" as "straight",
       },
       title: {
         text: "Ampere",
-        align: "left",
-      },
-
-      grid: {
-        row: {
-          colors: ["#f3f3f3", "white"], // takes an array which will be repeated on columns
-          opacity: 0.5,
-        },
-        fill: {
-          colors: ["#F44336", "#E91E63", "#9C27B0"],
-        },
+        align: "left" as "left",
       },
       xaxis: {
-        categories: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-        ],
+        categories: [] as string[],
       },
     },
   });
+
+  useEffect(() => {
+    // Fetch data dari API menggunakan axios
+    axios
+      .get(`https://bms.d2l.my.id/api/iot/conditions`)
+      .then((response) => {
+        const data = response.data.data;
+        const ampereData: number[] = [];
+        const categories: string[] = []; // Untuk menyimpan timestamp atau kategori lainnya
+
+        data.forEach((item: any) => {
+          if (item.id === idEws && item._field === "ampere") {
+            ampereData.push(item._value);
+            categories.push(item._time); // Misalnya jika ada timestamp di data
+          }
+        });
+
+        setState((prevState) => ({
+          ...prevState,
+          series: [{ name: "Ampere", data: ampereData }],
+          options: {
+            ...prevState.options,
+            xaxis: {
+              ...prevState.options.xaxis,
+              categories: categories,
+            },
+          },
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching data: ", error);
+      });
+  }, [idEws]); // Menambahkan idEws sebagai dependency useEffect
+
   return (
     <div id="chart">
       <ReactApexChart
         options={state.options}
         series={state.series}
-        type="area"
+        type="line"
         height={350}
       />
     </div>
   );
 }
+
 export default Ampere;

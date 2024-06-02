@@ -24,6 +24,7 @@ import {
   useColorModeValue,
   useBreakpointValue,
   useDisclosure,
+  Heading,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -33,10 +34,20 @@ import {
   MoonIcon,
   SunIcon,
 } from "@chakra-ui/icons";
+import { useRouter } from "next/navigation";
+import { useCookies } from "react-cookie";
 
 export default function WithSubnavigation() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onToggle } = useDisclosure();
+  const router = useRouter();
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+
+  // Fungsi logout
+  const logout = () => {
+    removeCookie("token"); // Hapus cookie token
+    router.push("/"); // Arahkan ke halaman login
+  };
 
   return (
     <Box
@@ -111,10 +122,19 @@ export default function WithSubnavigation() {
               />
             </MenuButton>
             <MenuList>
-              <MenuItem>Link 1</MenuItem>
-              <MenuItem>Link 2</MenuItem>
+              <Heading size="sm" marginStart="25px">
+                Aqsha Kusumojakti
+              </Heading>
+              <Heading
+                size="xs"
+                marginStart="25px"
+                marginTop="10px"
+                fontWeight="400"
+              >
+                Admin
+              </Heading>
               <MenuDivider />
-              <MenuItem>Logout</MenuItem>
+              <MenuItem onClick={logout}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </Stack>
