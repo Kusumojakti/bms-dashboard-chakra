@@ -21,7 +21,7 @@ import Voltage from "../component/voltage";
 import Ampere from "../component/ampere";
 
 interface Location {
-  id: string; // Tambahkan id di sini
+  id: string;
   nama_ews: string;
   alamat: string;
   lat: number;

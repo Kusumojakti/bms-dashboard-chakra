@@ -41,7 +41,6 @@ function Voltage({ idEws }: VoltageProps) {
   });
 
   useEffect(() => {
-    // Fetch data dari API menggunakan axios
     axios
       .get(`https://bms.d2l.my.id/api/iot/conditions`)
       .then((response) => {

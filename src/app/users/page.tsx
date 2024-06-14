@@ -232,16 +232,6 @@ function tableUsers() {
               <ModalHeader>Create new account</ModalHeader>
               <ModalCloseButton />
               <ModalBody pb={6}>
-                <FormControl>
-                  <FormLabel>User ID</FormLabel>
-                  <Input
-                    ref={initialRef}
-                    placeholder="User ID"
-                    value={user_id}
-                    onChange={(e) => setUser_id(e.target.value)}
-                  />
-                </FormControl>
-
                 <FormControl mt={4}>
                   <FormLabel>Nama</FormLabel>
                   <Input
