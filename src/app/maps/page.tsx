@@ -43,7 +43,7 @@ const Maps = () => {
 
   const getMaps = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/ews");
+      const response = await axios.get("https://bms.d2l.my.id/api/ews");
       setData(response.data.data);
     } catch (error) {
       console.error(error);

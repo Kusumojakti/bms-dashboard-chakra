@@ -94,7 +94,6 @@ function tableUsers() {
     const response = await axios.post(
       "https://bms.d2l.my.id/api/auth/register",
       {
-        user_id: user_id,
         name: name,
         email: email,
         password: password,

@@ -42,7 +42,7 @@ function Voltage({ idEws }: VoltageProps) {
 
   useEffect(() => {
     axios
-      .get(`https://bms.d2l.my.id/api/iot/conditions`)
+      .get(`https://bms.d2l.my.id/api/iot/conditions/${idEws}`)
       .then((response) => {
         const data = response.data.data;
         const voltageData: number[] = [];

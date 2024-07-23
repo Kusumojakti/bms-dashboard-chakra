@@ -43,8 +43,9 @@ function Temperature({ idEws }: TempProps) {
   useEffect(() => {
     // Fetch data dari API menggunakan axios
     axios
-      .get("https://bms.d2l.my.id/api/iot/conditions")
+      .get(`https://bms.d2l.my.id/api/iot/conditions/${idEws}`)
       .then((response) => {
+        console.log("API Response:", response.data);
         const data = response.data.data;
         const tempData: number[] = [];
         const categories: string[] = [];
