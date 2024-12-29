@@ -43,7 +43,7 @@ function Temperature({ idEws }: TempProps) {
   useEffect(() => {
     // Fetch data dari API menggunakan axios
     axios
-      .get(`https://bms.d2l.my.id/api/iot/conditions/${idEws}`)
+      .get(`https://bms.zegion.site/api/iot/conditions/${idEws}`)
       .then((response) => {
         console.log("API Response:", response.data);
         const data = response.data.data;
@@ -51,7 +51,7 @@ function Temperature({ idEws }: TempProps) {
         const categories: string[] = [];
 
         data.forEach((item: any) => {
-          if (item.id === idEws && item._field === "temperature") {
+          if (item.id === idEws && item._field === "temp") {
             tempData.push(item._value);
             categories.push(item._time); // Misalnya jika ada timestamp di data
           }

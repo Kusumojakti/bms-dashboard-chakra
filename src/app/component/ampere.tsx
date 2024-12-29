@@ -19,7 +19,7 @@ function Ampere({ idEws }: AmpereProps) {
     options: {
       chart: {
         height: 350,
-        type: "line" as "line",
+        type: "area" as "area",
         zoom: {
           enabled: true,
         },
@@ -28,7 +28,7 @@ function Ampere({ idEws }: AmpereProps) {
         enabled: false,
       },
       stroke: {
-        curve: "straight" as "straight",
+        curve: "smooth" as "smooth",
       },
       title: {
         text: "Ampere",
@@ -41,13 +41,12 @@ function Ampere({ idEws }: AmpereProps) {
   });
 
   useEffect(() => {
-    // Fetch data dari API menggunakan axios
     axios
-      .get(`https://bms.d2l.my.id/api/iot/conditions/${idEws}`)
+      .get(`https://bms.zegion.site/api/iot/conditions/${idEws}`)
       .then((response) => {
         const data = response.data.data;
         const ampereData: number[] = [];
-        const categories: string[] = []; // Untuk menyimpan timestamp atau kategori lainnya
+        const categories: string[] = [];
 
         data.forEach((item: any) => {
           if (item.id === idEws && item._field === "ampere") {
@@ -78,7 +77,7 @@ function Ampere({ idEws }: AmpereProps) {
       <ReactApexChart
         options={state.options}
         series={state.series}
-        type="line"
+        type="area"
         height={350}
       />
     </div>

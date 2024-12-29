@@ -57,7 +57,7 @@ function TableUsers() {
 
   const getDataEWS = async () => {
     try {
-      const response = await axios.get("https://bms.d2l.my.id/api/ews");
+      const response = await axios.get("https://bms.zegion.site/api/ews");
       setData(response.data.data);
     } catch (error) {
       console.error(error);

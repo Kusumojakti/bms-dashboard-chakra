@@ -62,7 +62,7 @@ function tableUsers() {
 
   const getDataEWS = async () => {
     try {
-      const response = await axios.get("https://bms.d2l.my.id/api/user", {
+      const response = await axios.get("https://bms.zegion.site/api/user", {
         headers: {
           Authorization: `Bearer ${cookies.token}`,
         },
@@ -92,7 +92,7 @@ function tableUsers() {
     setLoading(true);
 
     const response = await axios.post(
-      "https://bms.d2l.my.id/api/auth/register",
+      "https://bms.zegion.site/api/auth/register",
       {
         name: name,
         email: email,
@@ -127,7 +127,7 @@ function tableUsers() {
 
   async function handleDelete(id: string) {
     try {
-      await axios.delete(`https://bms.d2l.my.id/api/user/${id}`, {
+      await axios.delete(`https://bms.zegion.site/api/user/${id}`, {
         headers: {
           Authorization: `Bearer ${cookies.token}`,
         },
@@ -167,7 +167,7 @@ function tableUsers() {
 
     try {
       const response = await axios.put(
-        `https://bms.d2l.my.id/api/user/${editUser?.id}`,
+        `https://bms.zegion.site/api/user/${editUser?.id}`,
         {
           name: editUser?.name,
           id_roles: editUser?.id_roles,

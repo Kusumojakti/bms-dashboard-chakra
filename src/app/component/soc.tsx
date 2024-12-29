@@ -4,22 +4,22 @@ import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 
-interface VoltageProps {
+interface SOCProps {
   idEws: string;
 }
 
-function Voltage({ idEws }: VoltageProps) {
+function SOC({ idEws }: SOCProps) {
   const [state, setState] = useState({
     series: [
       {
-        name: "Voltage",
+        name: "SOC",
         data: [] as number[],
       },
     ],
     options: {
       chart: {
         height: 350,
-        type: "line" as "line",
+        type: "area" as "area",
         zoom: {
           enabled: true,
         },
@@ -28,10 +28,10 @@ function Voltage({ idEws }: VoltageProps) {
         enabled: false,
       },
       stroke: {
-        curve: "straight" as "straight",
+        curve: "smooth" as "smooth",
       },
       title: {
-        text: "Voltage",
+        text: "SOC",
         align: "left" as "left",
       },
       xaxis: {
@@ -45,19 +45,19 @@ function Voltage({ idEws }: VoltageProps) {
       .get(`https://bms.zegion.site/api/iot/conditions/${idEws}`)
       .then((response) => {
         const data = response.data.data;
-        const voltageData: number[] = [];
-        const categories: string[] = []; // Untuk menyimpan timestamp atau kategori lainnya
+        const socData: number[] = [];
+        const categories: string[] = [];
 
         data.forEach((item: any) => {
-          if (item.id === idEws && item._field === "voltage") {
-            voltageData.push(item._value);
+          if (item.id === idEws && item._field === "soc") {
+            socData.push(item._value);
             categories.push(item._time); // Misalnya jika ada timestamp di data
           }
         });
 
         setState((prevState) => ({
           ...prevState,
-          series: [{ name: "Voltage", data: voltageData }],
+          series: [{ name: "SOC", data: socData }],
           options: {
             ...prevState.options,
             xaxis: {
@@ -77,11 +77,11 @@ function Voltage({ idEws }: VoltageProps) {
       <ReactApexChart
         options={state.options}
         series={state.series}
-        type="line"
+        type="area"
         height={350}
       />
     </div>
   );
 }
 
-export default Voltage;
+export default SOC;

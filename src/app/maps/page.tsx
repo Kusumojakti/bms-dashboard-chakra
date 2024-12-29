@@ -19,6 +19,8 @@ import {
 import Temperature from "../component/temperaturechart";
 import Voltage from "../component/voltage";
 import Ampere from "../component/ampere";
+import SOC from "../component/soc";
+import SOH from "../component/soh";
 
 interface Location {
   id: string;
@@ -43,7 +45,7 @@ const Maps = () => {
 
   const getMaps = async () => {
     try {
-      const response = await axios.get("https://bms.d2l.my.id/api/ews");
+      const response = await axios.get("https://bms.zegion.site/api/ews");
       setData(response.data.data);
     } catch (error) {
       console.error(error);
@@ -118,6 +120,8 @@ const Maps = () => {
                     {selectedLocationData.nama_ews}
                   </Heading>
                   <Text mb={"30px"}>{selectedLocationData.alamat}</Text>
+                  <SOC idEws={selectedLocationData.id} />
+                  <SOH idEws={selectedLocationData.id} />
                   <Temperature idEws={selectedLocationData.id} />
                   <Voltage idEws={selectedLocationData.id} />
                   <Ampere idEws={selectedLocationData.id} />
